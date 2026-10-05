@@ -57,7 +57,7 @@ async function main() {
   const demo = new DemoDataSource("success");
   assert.equal(parseServiceList(demoServices).length, 3);
   assert.equal(parseDropList(demoDrops).length, 3);
-  assert.equal(parseBuildUpdateList(demoBuildUpdates).length, 2);
+  assert.equal(parseBuildUpdateList(demoBuildUpdates).length, 4);
   assert.equal(parseDesign(demoDesigns[0]).id, "demo-design-one");
   const drops = await demo.listDrops();
   assert.equal(drops.length, 2);
@@ -80,7 +80,7 @@ async function main() {
     await new OrphanDesignSource().getDesign("demo-design-one"),
     null,
   );
-  assert.equal((await demo.listBuildUpdates()).length, 1);
+  assert.equal((await demo.listBuildUpdates()).length, 3);
   assert.equal(await demo.getBuildUpdate("sample-hidden-draft"), null);
   assert.equal(await demo.getPolicy("sample-hidden-policy"), null);
 
