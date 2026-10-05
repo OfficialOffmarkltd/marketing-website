@@ -1,4 +1,6 @@
 import { Inter, Space_Grotesk } from "next/font/google";
+import { Footer } from "@/components/layout/footer";
+import { SiteShell } from "@/components/layout/site-shell";
 import { DirectionProvider } from "@/components/ui/direction";
 import { metadataConfig } from "@/config/site.config";
 import "./globals.css";
@@ -27,7 +29,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${inter.variable} ${spaceGrotesk.variable}`}
     >
       <body>
-        <DirectionProvider direction="ltr">{children}</DirectionProvider>
+        <DirectionProvider direction="ltr">
+          <SiteShell footer={<Footer />}>{children}</SiteShell>
+        </DirectionProvider>
       </body>
     </html>
   );
