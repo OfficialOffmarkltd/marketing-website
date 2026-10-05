@@ -3,56 +3,31 @@ import type { SiteConfig } from "@/types";
 
 export const siteConfig: SiteConfig = {
   name: "Offmark",
-  title: "Offmark | Web infra",
-  description: "Write high performant copy backed by data",
-  origin: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  keywords: ["Next.js 16", "Shadcn UI", "TypeScript", "Website Template"],
-  og: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/og.png`,
-  socials: {
-    github: "#",
-    x: "",
-  },
+  title: "Offmark | Fashion. On your terms.",
+  description:
+    "Offmark is a Nigerian fashion and technology company connecting original collections, fashion design and creative community.",
+  origin: process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000",
 };
 
 export const metadataConfig: Metadata = {
   metadataBase: new URL(siteConfig.origin),
   title: {
     default: siteConfig.title,
-    template: `%s · ${siteConfig.name}`,
+    template: "%s · Offmark",
   },
   description: siteConfig.description,
-  keywords: siteConfig.keywords,
-  creator: siteConfig.name,
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-  },
+  // Foundation preview: remove only when approved public content is ready.
+  robots: { index: false, follow: false },
   openGraph: {
     title: siteConfig.title,
     description: siteConfig.description,
-    url: siteConfig.origin,
     siteName: siteConfig.name,
-    images: [
-      {
-        url: siteConfig.og,
-        width: 2880,
-        height: 1800,
-        alt: siteConfig.name,
-      },
-    ],
     type: "website",
-    locale: "en_US",
+    locale: "en_NG",
   },
   twitter: {
-    card: "summary_large_image",
-    site: siteConfig.socials.x,
+    card: "summary",
     title: siteConfig.title,
     description: siteConfig.description,
-    images: {
-      url: siteConfig.og,
-      width: 2880,
-      height: 1800,
-      alt: siteConfig.name,
-    },
   },
 };
