@@ -53,7 +53,7 @@ export abstract class MemoryDataSource implements OffmarkDataSource {
     const design = this.content.designs.find((item) => item.id === id);
     if (!design) return null;
     const drop = this.content.drops.find((item) => item.id === design.dropId);
-    return drop?.status === "draft" ? null : design;
+    return !drop || drop.status === "draft" ? null : design;
   }
 
   async listBuildUpdates() {

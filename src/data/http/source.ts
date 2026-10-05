@@ -64,6 +64,7 @@ export class HttpDataSource implements OffmarkDataSource {
     try {
       response = await fetch(new URL(path, this.baseUrl), {
         ...init,
+        signal: init?.signal ?? AbortSignal.timeout(10_000),
         credentials: "include",
         headers: {
           accept: "application/json",
