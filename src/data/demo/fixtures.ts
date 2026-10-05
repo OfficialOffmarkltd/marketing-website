@@ -1,0 +1,185 @@
+import type {
+  BuildUpdate,
+  Design,
+  Drop,
+  Policy,
+  Service,
+} from "@/domain/catalog";
+
+export const demoProvenance = {
+  kind: "demo",
+  label: "Fictional preview data",
+  publishable: false,
+} as const;
+
+export const demoServices = [
+  {
+    id: "demo-service-seam",
+    slug: "seam",
+    name: "Seam",
+    summary: "Fictional feature content for layout review only.",
+    availability: "in_development",
+    provenance: demoProvenance,
+  },
+  {
+    id: "demo-service-marketplace",
+    slug: "marketplace",
+    name: "Marketplace",
+    summary: "Fictional commerce-service content for layout review only.",
+    availability: "in_development",
+    provenance: demoProvenance,
+  },
+  {
+    id: "demo-service-drip",
+    slug: "drip",
+    name: "Drip",
+    summary: "Fictional community-service content for layout review only.",
+    availability: "in_development",
+    provenance: demoProvenance,
+  },
+] satisfies Service[];
+
+export const demoDrops = [
+  {
+    id: "demo-drop-open",
+    slug: "demo-open-drop",
+    name: "Sample Open Drop",
+    story: "Fictional collection copy used to review an open preorder flow.",
+    status: "open",
+    designIds: ["demo-design-one", "demo-design-unpriced"],
+    provenance: demoProvenance,
+  },
+  {
+    id: "demo-drop-retired",
+    slug: "demo-retired-drop",
+    name: "Sample Retired Drop",
+    story: "Fictional archive content used to review retired states.",
+    status: "retired",
+    designIds: ["demo-design-retired"],
+    provenance: demoProvenance,
+  },
+  {
+    id: "demo-drop-draft",
+    slug: "demo-draft-drop",
+    name: "Hidden Sample Draft",
+    story: "This fixture proves that drafts stay out of public readers.",
+    status: "draft",
+    designIds: [],
+    provenance: demoProvenance,
+  },
+] satisfies Drop[];
+
+export const demoDesigns = [
+  {
+    id: "demo-design-one",
+    dropId: "demo-drop-open",
+    slug: "sample-wrap-shirt",
+    name: "Sample Wrap Shirt",
+    price: { amountMinor: 4850000, currency: "NGN" },
+    images: [],
+    materials: "Fictional material details for interface review.",
+    fit: "Fictional fit description for interface review.",
+    care: "Fictional care instructions for interface review.",
+    variants: [
+      {
+        id: "demo-variant-one-s",
+        size: "S",
+        colour: "Sample orange",
+        available: true,
+      },
+      {
+        id: "demo-variant-one-m",
+        size: "M",
+        colour: "Sample orange",
+        available: false,
+        unavailableReason: "Demonstration of an unavailable variant.",
+      },
+    ],
+    estimatedDispatchText: "Fictional dispatch estimate for interface review.",
+    provenance: demoProvenance,
+  },
+  {
+    id: "demo-design-unpriced",
+    dropId: "demo-drop-open",
+    slug: "sample-unpriced-design",
+    name: "Sample Unpriced Design",
+    images: [],
+    materials: "Fictional material details.",
+    fit: "Fictional fit details.",
+    care: "Fictional care details.",
+    variants: [],
+    estimatedDispatchText: "No real dispatch estimate is represented.",
+    provenance: demoProvenance,
+  },
+  {
+    id: "demo-design-retired",
+    dropId: "demo-drop-retired",
+    slug: "sample-archive-design",
+    name: "Sample Archive Design",
+    price: { amountMinor: 5200000, currency: "NGN" },
+    images: [],
+    materials: "Fictional material details.",
+    fit: "Fictional fit details.",
+    care: "Fictional care details.",
+    variants: [
+      {
+        id: "demo-variant-retired",
+        size: "M",
+        colour: "Sample black",
+        available: true,
+      },
+    ],
+    estimatedDispatchText: "This retired sample cannot be ordered.",
+    provenance: demoProvenance,
+  },
+] satisfies Design[];
+
+export const demoBuildUpdates = [
+  {
+    id: "demo-update-published",
+    slug: "sample-published-update",
+    publishedAt: "2026-09-01T09:00:00+01:00",
+    product: "Offmark",
+    title: "Sample published milestone",
+    summary: "Fictional evidence entry for interface review.",
+    body: "This is not a real company update.",
+    kind: "demo",
+    publicationStatus: "published",
+    provenance: demoProvenance,
+  },
+  {
+    id: "demo-update-draft",
+    slug: "sample-hidden-draft",
+    publishedAt: "2026-09-02T09:00:00+01:00",
+    product: "Offmark",
+    title: "Hidden draft milestone",
+    summary: "This fixture must not appear in public readers.",
+    body: "Draft fixture.",
+    kind: "work_in_progress",
+    publicationStatus: "draft",
+    provenance: demoProvenance,
+  },
+] satisfies BuildUpdate[];
+
+export const demoPolicies = [
+  {
+    id: "demo-policy-preorder",
+    slug: "sample-preorder-policy",
+    title: "Sample preorder policy",
+    version: "demo-1",
+    effectiveAt: "2026-09-01T09:00:00+01:00",
+    body: "Fictional terms for interface review. These are not Offmark policy.",
+    publicationStatus: "published",
+    provenance: demoProvenance,
+  },
+  {
+    id: "demo-policy-draft",
+    slug: "sample-hidden-policy",
+    title: "Hidden sample policy",
+    version: "demo-draft",
+    effectiveAt: "2026-09-01T09:00:00+01:00",
+    body: "Draft fixture.",
+    publicationStatus: "draft",
+    provenance: demoProvenance,
+  },
+] satisfies Policy[];
