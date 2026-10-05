@@ -56,17 +56,27 @@ export type Variant = {
   unavailableReason?: string;
 };
 
+export type SizeGuide = {
+  unit: "cm" | "in";
+  rows: {
+    size: string;
+    measurements: Record<string, number>;
+  }[];
+};
+
 export type Design = {
   id: string;
   dropId: string;
   slug: string;
   name: string;
+  description: string;
   price?: Money;
   images: Asset[];
   materials: string;
   fit: string;
   care: string;
   variants: Variant[];
+  sizeGuide?: SizeGuide;
   estimatedDispatchText: string;
   provenance: RecordProvenance;
 };

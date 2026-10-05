@@ -57,6 +57,13 @@ function integer(value: unknown, path: string, minimum = 0) {
   return value as number;
 }
 
+function finiteNumber(value: unknown, path: string, minimum = 0) {
+  if (typeof value !== "number" || !Number.isFinite(value) || value < minimum) {
+    return fail(path, `a finite number greater than or equal to ${minimum}`);
+  }
+  return value;
+}
+
 function array<T>(
   value: unknown,
   path: string,
@@ -191,11 +198,47 @@ export function parseVariant(value: unknown, path = "variant"): Variant {
 
 export function parseDesign(value: unknown, path = "design"): Design {
   const item = record(value, path);
+  const parsedSizeGuide =
+    item.sizeGuide === undefined
+      ? undefined
+      : (() => {
+          const guide = record(item.sizeGuide, `${path}.sizeGuide`);
+          return {
+            unit: enumeration(guide.unit, `${path}.sizeGuide.unit`, [
+              "cm",
+              "in",
+            ]),
+            rows: array(
+              guide.rows,
+              `${path}.sizeGuide.rows`,
+              (row, rowPath) => {
+                const parsedRow = record(row, rowPath);
+                const measurements = record(
+                  parsedRow.measurements,
+                  `${rowPath}.measurements`,
+                );
+                return {
+                  size: string(parsedRow.size, `${rowPath}.size`),
+                  measurements: Object.fromEntries(
+                    Object.entries(measurements).map(([name, measurement]) => [
+                      name,
+                      finiteNumber(
+                        measurement,
+                        `${rowPath}.measurements.${name}`,
+                      ),
+                    ]),
+                  ),
+                };
+              },
+            ),
+          };
+        })();
   return {
     id: string(item.id, `${path}.id`),
     dropId: string(item.dropId, `${path}.dropId`),
     slug: slug(item.slug, `${path}.slug`),
     name: string(item.name, `${path}.name`),
+    description: string(item.description, `${path}.description`),
     price:
       item.price === undefined
         ? undefined
@@ -205,6 +248,7 @@ export function parseDesign(value: unknown, path = "design"): Design {
     fit: string(item.fit, `${path}.fit`),
     care: string(item.care, `${path}.care`),
     variants: array(item.variants, `${path}.variants`, parseVariant),
+    sizeGuide: parsedSizeGuide,
     estimatedDispatchText: string(
       item.estimatedDispatchText,
       `${path}.estimatedDispatchText`,
