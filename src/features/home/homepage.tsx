@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Container, Section } from "@/components/layout/primitives";
 import { Badge, EmptyState } from "@/components/ui/feedback";
 import { ActionLink } from "@/components/ui/link";
@@ -52,15 +53,18 @@ function DemoLabel({ provenance }: { provenance: Design["provenance"] }) {
 }
 
 function ProductCard({ design, drop }: { design: Design; drop: Drop }) {
+  const basePath =
+    design.provenance.kind === "demo" ? "/preview/collections" : "/collections";
+  const href = `${basePath}/${drop.slug}/${design.slug}`;
   return (
     <article className="home-product-card">
-      <div
+      <Link
+        href={href}
         className="home-product-image"
-        role="img"
-        aria-label={`Image pending for ${design.name}`}
+        aria-label={`View ${design.name}`}
       >
         <span aria-hidden="true">Image pending</span>
-      </div>
+      </Link>
       <div className="home-product-copy">
         <div className="home-card-meta">
           <Badge>
@@ -68,7 +72,9 @@ function ProductCard({ design, drop }: { design: Design; drop: Drop }) {
           </Badge>
           <DemoLabel provenance={design.provenance} />
         </div>
-        <h3 className="heading-card">{design.name}</h3>
+        <h3 className="heading-card">
+          <Link href={href}>{design.name}</Link>
+        </h3>
         <p>{design.price ? formatMoney(design.price) : "Price unavailable"}</p>
         <p className="text-metadata">{drop.name}</p>
       </div>
@@ -83,6 +89,8 @@ function CurrentDrop({
   drop: Drop | null;
   designs: Design[];
 }) {
+  const basePath =
+    drop?.provenance.kind === "demo" ? "/preview/collections" : "/collections";
   return (
     <Section id="collections" aria-labelledby="collections-heading">
       <Container>
@@ -100,7 +108,10 @@ function CurrentDrop({
               We release original designs and make them against demand through
               preorders.
             </p>
-            <ActionLink href="/collections" variant="text">
+            <ActionLink
+              href={drop ? `${basePath}/${drop.slug}` : "/collections"}
+              variant="text"
+            >
               Explore collections <span aria-hidden="true">↗</span>
             </ActionLink>
           </div>
