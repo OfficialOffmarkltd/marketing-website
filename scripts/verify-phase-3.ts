@@ -8,6 +8,7 @@ import {
 import { demoScenarioNames } from "../src/data/demo/scenarios";
 import { DemoDataSource } from "../src/data/demo/source";
 import { HttpDataSource } from "../src/data/http/source";
+import { MemoryDataSource } from "../src/data/memory-source";
 import { readDataConfiguration } from "../src/data/mode";
 import { PublicDataSource } from "../src/data/public-source";
 import {
@@ -64,6 +65,21 @@ async function main() {
   assert(drops.every((drop) => drop.provenance.kind === "demo"));
   assert(drops.every((drop) => !drop.provenance.publishable));
   assert.equal(await demo.getDrop("demo-draft-drop"), null);
+  class OrphanDesignSource extends MemoryDataSource {
+    constructor() {
+      super({
+        services: [],
+        drops: [],
+        designs: [demoDesigns[0]],
+        buildUpdates: [],
+        policies: [],
+      });
+    }
+  }
+  assert.equal(
+    await new OrphanDesignSource().getDesign("demo-design-one"),
+    null,
+  );
   assert.equal((await demo.listBuildUpdates()).length, 1);
   assert.equal(await demo.getBuildUpdate("sample-hidden-draft"), null);
   assert.equal(await demo.getPolicy("sample-hidden-policy"), null);
@@ -178,11 +194,32 @@ async function main() {
   );
 
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = async () =>
-    Response.json({ unexpected: true }, { status: 200 });
+  const fallbackSignals: (AbortSignal | null)[] = [];
+  globalThis.fetch = async (_input, init) => {
+    fallbackSignals.push(init?.signal ?? null);
+    return Response.json({ unexpected: true }, { status: 200 });
+  };
   await expectCode(
     () => new HttpDataSource("https://api.example.test").listDrops(),
     "invalid_data",
+  );
+  assert(fallbackSignals[0] instanceof AbortSignal);
+
+  const suppliedSignal = new AbortController().signal;
+  const source = new HttpDataSource("https://api.example.test") as unknown as {
+    request<T>(
+      path: string,
+      parser: (value: unknown) => T,
+      init?: RequestInit,
+    ): Promise<T | null>;
+  };
+  globalThis.fetch = async (_input, init) => {
+    assert.equal(init?.signal, suppliedSignal);
+    throw new DOMException("Aborted", "AbortError");
+  };
+  await expectCode(
+    () => source.request("drops", () => [], { signal: suppliedSignal }),
+    "temporary_failure",
   );
   globalThis.fetch = originalFetch;
 
