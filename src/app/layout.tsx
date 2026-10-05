@@ -1,19 +1,20 @@
-import { ThemeProvider } from "@wrksz/themes/next";
-import { Geist, Instrument_Sans } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
+import { DirectionProvider } from "@/components/ui/direction";
 import { metadataConfig } from "@/config/site.config";
 import "./globals.css";
 
-import { DirectionProvider } from "@/components/ui/direction";
-import { cn } from "@/lib/utils";
-
-const instrumentSans = Instrument_Sans({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-sans",
+  variable: "--font-inter",
+  display: "swap",
+  fallback: ["Arial", "sans-serif"],
 });
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
+  variable: "--font-space-grotesk",
+  display: "swap",
+  fallback: ["Arial", "sans-serif"],
 });
 
 export const metadata = metadataConfig;
@@ -22,25 +23,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      suppressHydrationWarning
-      className={cn(
-        "h-full",
-        "antialiased",
-        geistSans.variable,
-        "font-sans",
-        instrumentSans.variable,
-      )}
+      dir="ltr"
+      className={`${inter.variable} ${spaceGrotesk.variable}`}
     >
-      <body className="min-h-full flex flex-col">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          themes={["light", "dark"]}
-          enableSystem={true}
-          disableTransitionOnChange
-        >
-          <DirectionProvider direction="rtl">{children}</DirectionProvider>
-        </ThemeProvider>
+      <body>
+        <DirectionProvider direction="ltr">{children}</DirectionProvider>
       </body>
     </html>
   );

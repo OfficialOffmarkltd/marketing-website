@@ -3,10 +3,4 @@ export type SiteConfig = {
   title: string;
   description: string;
   origin: string;
-  og: string;
-  keywords: string[];
-  socials: {
-    github: string;
-    x: string;
-  };
 };
