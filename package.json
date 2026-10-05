@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "biome check",
     "lint:fix": "biome check --write .",
+    "check:data": "bun scripts/verify-phase-3.ts",
     "format": "biome format --write",
     "prepare": "lefthook install"
   },
