@@ -1,4 +1,7 @@
 import { Inter, Space_Grotesk } from "next/font/google";
+import type { ReactNode } from "react";
+import { Footer } from "@/components/layout/footer";
+import { SiteShell } from "@/components/layout/site-shell";
 import { DirectionProvider } from "@/components/ui/direction";
 import { metadataConfig } from "@/config/site.config";
 import "./globals.css";
@@ -19,7 +22,7 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata = metadataConfig;
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
@@ -27,7 +30,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${inter.variable} ${spaceGrotesk.variable}`}
     >
       <body>
-        <DirectionProvider direction="ltr">{children}</DirectionProvider>
+        <DirectionProvider direction="ltr">
+          <SiteShell footer={<Footer />}>{children}</SiteShell>
+        </DirectionProvider>
       </body>
     </html>
   );
