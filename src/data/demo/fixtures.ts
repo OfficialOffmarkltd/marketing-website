@@ -75,6 +75,8 @@ export const demoDesigns = [
     dropId: "demo-drop-open",
     slug: "sample-wrap-shirt",
     name: "Sample Wrap Shirt",
+    description:
+      "A fictional wrap-front shirt used to review the preorder interface.",
     price: { amountMinor: 4850000, currency: "NGN" },
     images: [],
     materials: "Fictional material details for interface review.",
@@ -95,6 +97,13 @@ export const demoDesigns = [
         unavailableReason: "Demonstration of an unavailable variant.",
       },
     ],
+    sizeGuide: {
+      unit: "cm",
+      rows: [
+        { size: "S", measurements: { Chest: 96, Length: 70 } },
+        { size: "M", measurements: { Chest: 102, Length: 72 } },
+      ],
+    },
     estimatedDispatchText: "Fictional dispatch estimate for interface review.",
     provenance: demoProvenance,
   },
@@ -103,6 +112,8 @@ export const demoDesigns = [
     dropId: "demo-drop-open",
     slug: "sample-panel-trousers",
     name: "Sample Panel Trousers",
+    description:
+      "Fictional panelled trousers used to review a second design card.",
     price: { amountMinor: 5650000, currency: "NGN" },
     images: [],
     materials: "Fictional material details for interface review.",
@@ -124,6 +135,7 @@ export const demoDesigns = [
     dropId: "demo-drop-open",
     slug: "sample-unpriced-design",
     name: "Sample Unpriced Design",
+    description: "A fictional design used to demonstrate unavailable pricing.",
     images: [],
     materials: "Fictional material details.",
     fit: "Fictional fit details.",
@@ -137,6 +149,7 @@ export const demoDesigns = [
     dropId: "demo-drop-retired",
     slug: "sample-archive-design",
     name: "Sample Archive Design",
+    description: "A fictional retired design used to review the archive state.",
     price: { amountMinor: 5200000, currency: "NGN" },
     images: [],
     materials: "Fictional material details.",
