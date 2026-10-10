@@ -9,6 +9,9 @@
     "lint": "biome check",
     "lint:fix": "biome check --write .",
     "check:data": "bun scripts/verify-phase-3.ts",
+    "check:bag": "bun scripts/verify-phase-6.ts",
+    "check:phase7": "bun scripts/verify-phase-7.ts",
+    "check:phases8-10": "bun scripts/verify-phases-8-10.ts",
     "format": "biome format --write",
     "prepare": "lefthook install"
   },
@@ -31,6 +34,7 @@
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
     "lefthook": "^2.1.12",
+    "playwright": "^1.64.0",
     "shadcn": "^4.21.0",
     "tailwindcss": "^4",
     "typescript": "^5"

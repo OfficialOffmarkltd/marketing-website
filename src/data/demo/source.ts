@@ -51,6 +51,13 @@ export class DemoDataSource extends MemoryDataSource {
         requestId: "demo-request-temporary-failure",
       });
     }
+    if (this.scenario === "rate_limited") {
+      throw new DataSourceError({
+        code: "rate_limited",
+        message: "The simulated submission limit was reached. Try again later.",
+        requestId: "demo-request-rate-limited",
+      });
+    }
   }
 
   override async listDrops() {
@@ -113,6 +120,12 @@ export class DemoDataSource extends MemoryDataSource {
   }
 
   override async createQuote(lines: BagLine[]): Promise<CheckoutQuote> {
+    if (this.scenario === "delivery_unavailable") {
+      throw new DataSourceError({
+        code: "unavailable",
+        message: "Delivery is unavailable for the simulated address.",
+      });
+    }
     const bag = await this.validateBag(lines);
     if (!bag.validForCheckout) {
       throw new DataSourceError({
@@ -136,7 +149,7 @@ export class DemoDataSource extends MemoryDataSource {
       delivery,
       total: add(bag.subtotal, delivery),
       acceptedPolicyVersions: { preorder: "demo-1" },
-      requiresAcknowledgement: false,
+      requiresAcknowledgement: true,
     };
   }
 
@@ -151,11 +164,13 @@ export class DemoDataSource extends MemoryDataSource {
     return {
       orderReference: "DEMO-ORDER-001",
       paymentState:
-        this.scenario === "payment_failed"
-          ? ("failed" as const)
-          : this.scenario === "payment_confirmed"
-            ? ("confirmed" as const)
-            : ("pending" as const),
+        this.scenario === "order_refunded"
+          ? ("refunded" as const)
+          : this.scenario === "payment_failed"
+            ? ("failed" as const)
+            : this.scenario === "payment_confirmed"
+              ? ("paid" as const)
+              : ("pending" as const),
       simulated: true,
     };
   }
@@ -190,12 +205,17 @@ export class DemoDataSource extends MemoryDataSource {
       reference: "DEMO-ORDER-001",
       placedAt: "2026-09-03T10:00:00+01:00",
       paymentState:
-        this.scenario === "payment_failed"
-          ? ("failed" as const)
-          : this.scenario === "payment_pending"
-            ? ("pending" as const)
-            : ("paid" as const),
-      fulfillmentState: "awaiting_production" as const,
+        this.scenario === "order_refunded"
+          ? ("refunded" as const)
+          : this.scenario === "payment_failed"
+            ? ("failed" as const)
+            : this.scenario === "payment_pending"
+              ? ("pending" as const)
+              : ("paid" as const),
+      fulfillmentState:
+        this.scenario === "order_dispatched"
+          ? ("dispatched" as const)
+          : ("awaiting_production" as const),
       lines: bag.lines,
       subtotal: bag.subtotal,
       delivery,

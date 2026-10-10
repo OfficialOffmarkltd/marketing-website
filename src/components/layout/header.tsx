@@ -11,13 +11,19 @@ import {
 } from "@/components/ui/dialog";
 import { ActionLink } from "@/components/ui/link";
 import { isCurrentPath, navigation } from "@/config/navigation";
+import { useBag } from "@/features/bag/bag-context";
 import { Brand } from "./brand";
 
-// The bag feature supplies a hydrated count in Phase 6. Null never claims empty.
-export function BagLink({ count = null }: { count?: number | null }) {
+export function BagLink({
+  count,
+  href,
+}: {
+  count: number | null;
+  href: string;
+}) {
   return (
     <Link
-      href="/bag"
+      href={href}
       className="bag-link"
       aria-label={
         count === null
@@ -32,11 +38,13 @@ export function BagLink({ count = null }: { count?: number | null }) {
 }
 export function Header({ compact = false }: { compact?: boolean }) {
   const pathname = usePathname();
+  const { count } = useBag();
   const [open, setOpen] = useState(false);
   const navigating = useRef(false);
   const shopping = ["/collections", "/bag", "/checkout", "/orders"].some(
     (path) => isCurrentPath(pathname, path),
   );
+  const bagHref = pathname.startsWith("/preview/") ? "/preview/bag" : "/bag";
   useEffect(() => {
     const query = window.matchMedia("(min-width: 1024px)");
     const closeOnDesktop = () => {
@@ -50,7 +58,7 @@ export function Header({ compact = false }: { compact?: boolean }) {
       <div className="site-container header-inner">
         <Brand />
         {compact ? (
-          <ActionLink href="/bag" variant="text">
+          <ActionLink href={bagHref} variant="text">
             Back to bag
           </ActionLink>
         ) : (
@@ -69,7 +77,7 @@ export function Header({ compact = false }: { compact?: boolean }) {
               ))}
             </nav>
             <div className="header-actions">
-              <BagLink />
+              <BagLink count={count} href={bagHref} />
               <div className="desktop-cta">
                 {!shopping && (
                   <ActionLink href="/collections">

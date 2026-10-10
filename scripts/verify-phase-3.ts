@@ -14,14 +14,18 @@ import { PublicDataSource } from "../src/data/public-source";
 import {
   parseBagStorage,
   parseBuildUpdateList,
+  parseCheckoutResult,
   parseDesign,
   parseDrop,
   parseDropList,
+  parseOrderView,
   parseSafeError,
   parseServiceList,
+  parseValidatedBag,
 } from "../src/data/validation";
 import { DataContractError, DataSourceError } from "../src/domain/errors";
 import { formatMoney, formatPublishedDate, isSlug } from "../src/domain/format";
+import backendResponses from "./fixtures/backend-responses.json";
 
 const sampleLine = {
   designId: "demo-design-one",
@@ -151,7 +155,7 @@ async function main() {
         checkoutRequest,
       )
     ).paymentState,
-    "confirmed",
+    "paid",
   );
   await expectCode(
     () => new DemoDataSource("access_expired").redeemOrderAccess("demo-token"),
@@ -165,7 +169,7 @@ async function main() {
   const loadingStarted = performance.now();
   await new DemoDataSource("loading").listDrops();
   assert(performance.now() - loadingStarted >= 500);
-  assert.equal(demoScenarioNames.length, 11);
+  assert.equal(demoScenarioNames.length, 15);
 
   assert.deepEqual(parseBagStorage({ version: 1, lines: [sampleLine] }), {
     version: 1,
@@ -193,7 +197,69 @@ async function main() {
     { email: ["Enter a valid email."] },
   );
 
+  const backendDrop = parseDrop(backendResponses.drops[0]);
+  const backendDesign = parseDesign(backendResponses.design);
+  const backendBag = parseValidatedBag(backendResponses.validatedBag);
+  assert.equal(backendDrop.closesAt, undefined);
+  assert.equal(backendDrop.campaignImage?.provenance, undefined);
+  assert.equal(backendDesign.price?.amountMinor, 4_850_000);
+  assert.equal(backendDesign.images[0]?.provenance, undefined);
+  assert.equal(backendDesign.variants[0]?.unavailableReason, undefined);
+  assert.equal(backendBag.lines[1]?.design, null);
+  assert.deepEqual(backendBag.lines[1]?.changes, [
+    "removed",
+    "unavailable",
+    "unpriced",
+  ]);
+  assert.equal(
+    parseCheckoutResult(backendResponses.checkoutResult).paymentState,
+    "paid",
+  );
+  assert.equal(
+    parseOrderView(backendResponses.order).events[0]?.detail,
+    undefined,
+  );
+  assert.equal(parseSafeError(backendResponses.conflictError).code, "conflict");
+
   const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (input) => {
+    const path = new URL(String(input)).pathname;
+    if (path === "/api/v1/drops") return Response.json(backendResponses.drops);
+    if (path === `/api/v1/designs/${backendResponses.design.id}`) {
+      return Response.json(backendResponses.design);
+    }
+    if (path === "/api/v1/bag/validate") {
+      return Response.json(backendResponses.validatedBag);
+    }
+    if (path === "/api/v1/checkout/sessions") {
+      return Response.json(backendResponses.checkoutResult, { status: 201 });
+    }
+    if (path === `/api/v1/orders/${backendResponses.order.reference}`) {
+      return Response.json(backendResponses.order);
+    }
+    return Response.json(backendResponses.conflictError, { status: 409 });
+  };
+  const backendSource = new HttpDataSource("https://api.example.test");
+  assert.equal((await backendSource.listDrops())[0]?.slug, "first-drop");
+  assert.equal(
+    (await backendSource.getDesign(backendResponses.design.id))?.name,
+    "Wrap Shirt",
+  );
+  assert.equal((await backendSource.validateBag([sampleLine])).lines.length, 2);
+  assert.equal(
+    (await backendSource.beginCheckout(checkoutRequest)).paymentState,
+    "paid",
+  );
+  assert.equal(
+    (await backendSource.getOrder(backendResponses.order.reference)).events[0]
+      ?.detail,
+    undefined,
+  );
+  await expectCode(
+    () => backendSource.getBuildUpdate("missing-update"),
+    "conflict",
+  );
+
   const fallbackSignals: (AbortSignal | null)[] = [];
   globalThis.fetch = async (_input, init) => {
     fallbackSignals.push(init?.signal ?? null);
