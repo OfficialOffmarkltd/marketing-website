@@ -6,21 +6,38 @@ export type BagLine = {
   quantity: number;
 };
 
+export type StoredBagLine = BagLine & {
+  /** Price shown when the customer added or last accepted this line. */
+  unitAmountMinor?: number;
+};
+
 export type BagStorage = {
   version: 1;
-  lines: BagLine[];
+  lines: StoredBagLine[];
 };
 
 export type BagLineChange =
   | "price_changed"
+  | "unpriced"
   | "unavailable"
   | "quantity_adjusted"
-  | "removed";
+  | "removed"
+  | "variant_design_mismatch";
+
+export type ValidatedDesignSnapshot = Omit<
+  Design,
+  "variants" | "provenance" | "images" | "sizeGuide"
+>;
+
+export type ValidatedDropSnapshot = Omit<
+  Drop,
+  "designIds" | "provenance" | "campaignImage"
+>;
 
 export type ValidatedBagLine = {
-  design: Design;
-  drop: Drop;
-  variant: Variant;
+  design: ValidatedDesignSnapshot | null;
+  drop: ValidatedDropSnapshot | null;
+  variant: Variant | null;
   quantity: number;
   lineTotal: Money;
   changes: BagLineChange[];
@@ -67,7 +84,7 @@ export type CheckoutSessionRequest = {
 
 export type CheckoutResult = {
   orderReference: string;
-  paymentState: "pending" | "failed" | "confirmed";
+  paymentState: PaymentState;
   redirectUrl?: string;
   simulated: boolean;
 };
@@ -108,7 +125,7 @@ export type RedeemOrderAccessResult = { authorized: true; simulated: boolean };
 export type WaitlistSubmission = {
   email: string;
   serviceId: string;
-  consent: boolean;
+  consent: true;
 };
 
 export type ContactSubmission = {

@@ -1,10 +1,15 @@
-import { RoutePlaceholder } from "@/components/layout/route-placeholder";
+import type { Metadata } from "next";
+import { getServerDataSource } from "@/data/source.server";
+import { loadBagCatalogue } from "@/features/bag/data";
+import { CheckoutPage } from "@/features/checkout/checkout-page";
 
-export default function Page() {
+export const metadata: Metadata = {
+  title: "Checkout",
+  robots: { index: false, follow: false },
+};
+
+export default async function Page() {
   return (
-    <RoutePlaceholder
-      title="Checkout"
-      lead="Purchasing is not enabled in this preview. No payment will be collected."
-    />
+    <CheckoutPage catalogue={await loadBagCatalogue(getServerDataSource())} />
   );
 }

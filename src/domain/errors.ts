@@ -2,12 +2,15 @@ export type FieldErrors = Record<string, string[]>;
 
 export type SafeErrorCode =
   | "invalid_data"
+  | "bad_request"
   | "configuration_error"
   | "not_found"
   | "unavailable"
   | "price_changed"
   | "quote_expired"
   | "unauthorized"
+  | "forbidden"
+  | "conflict"
   | "rate_limited"
   | "temporary_failure";
 

@@ -1,10 +1,10 @@
-import { RoutePlaceholder } from "@/components/layout/route-placeholder";
+import type { Metadata } from "next";
+import { OrderAccessPage } from "@/features/orders/order-pages";
 
+export const metadata: Metadata = {
+  title: "Access your order",
+  robots: { index: false, follow: false },
+};
 export default function Page() {
-  return (
-    <RoutePlaceholder
-      title="Access your order"
-      lead="Secure order access will be available when the order service is connected."
-    />
-  );
+  return <OrderAccessPage />;
 }

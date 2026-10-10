@@ -1,10 +1,12 @@
-import { RoutePlaceholder } from "@/components/layout/route-placeholder";
+import type { Metadata } from "next";
+import { AboutPage } from "@/features/company/company-pages";
+
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "Learn about Offmark, a Nigerian fashion and technology company.",
+};
 
 export default function Page() {
-  return (
-    <RoutePlaceholder
-      title="About Offmark"
-      lead="Clothing, creativity and community, rooted in Nigeria."
-    />
-  );
+  return <AboutPage />;
 }
