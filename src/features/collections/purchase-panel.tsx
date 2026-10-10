@@ -11,6 +11,7 @@ import {
 import { ActionLink } from "@/components/ui/link";
 import type { Design, Drop, Variant } from "@/domain/catalog";
 import { formatMoney } from "@/domain/format";
+import { useBag } from "@/features/bag/bag-context";
 import { collectionHref } from "./data";
 import { dropStatusLabels, preorderExplanation } from "./status";
 
@@ -125,6 +126,7 @@ export function PurchasePanel({
   design: Design;
   basePath: string;
 }) {
+  const { addLine } = useBag();
   const [colour, setColour] = useState<string>();
   const [size, setSize] = useState<string>();
   const [quantity, setQuantity] = useState(1);
@@ -149,7 +151,6 @@ export function PurchasePanel({
       colour &&
       size,
   );
-  const demoAction = ready && design.provenance.kind === "demo";
 
   useEffect(() => {
     const element = actionRef.current;
@@ -182,16 +183,21 @@ export function PurchasePanel({
         (!colour || variant.colour === colour) &&
         variantAvailable(variant),
     );
-  const actionLabel = !design.price
-    ? "Price unavailable"
-    : design.provenance.kind === "demo"
-      ? "Preview add to bag"
-      : "Bag unavailable";
+  const actionLabel = design.price
+    ? "Add preorder to bag"
+    : "Price unavailable";
+  const bagHref = basePath.startsWith("/preview") ? "/preview/bag" : "/bag";
 
-  const previewAdd = () => {
-    if (!demoAction) return;
+  const addToBag = () => {
+    if (!ready || !matchingVariant || !design.price) return;
+    addLine({
+      designId: design.id,
+      variantId: matchingVariant.id,
+      quantity,
+      unitAmountMinor: design.price.amountMinor,
+    });
     setMessage(
-      `${quantity} × ${design.name}, ${colour}, size ${size} is ready for the bag preview. No item or order was created.`,
+      `${quantity} × ${design.name}, ${colour}, size ${size} added to your bag.`,
     );
   };
 
@@ -308,7 +314,7 @@ export function PurchasePanel({
             View archive
           </ActionLink>
         ) : (
-          <Button type="button" disabled={!demoAction} onClick={previewAdd}>
+          <Button type="button" disabled={!ready} onClick={addToBag}>
             {actionLabel}
           </Button>
         )}
@@ -317,23 +323,25 @@ export function PurchasePanel({
             Select an available colour and size to continue.
           </p>
         )}
-        {ready && design.provenance.kind !== "demo" && (
-          <p className="text-metadata">Bag integration is not enabled yet.</p>
-        )}
       </div>
       <p className="purchase-explanation">{preorderExplanation(drop.status)}</p>
       <p className="purchase-message" aria-live="polite">
         {message}
       </p>
+      {message && (
+        <ActionLink href={bagHref} variant="text">
+          View bag <span aria-hidden="true">↗</span>
+        </ActionLink>
+      )}
 
-      {showSticky && demoAction && design.price && (
+      {showSticky && ready && design.price && (
         <div className="product-sticky-action">
           <div>
             <span className="text-metadata">{design.name}</span>
             <strong>{formatMoney(design.price)}</strong>
           </div>
-          <Button type="button" onClick={previewAdd}>
-            Preview add to bag
+          <Button type="button" onClick={addToBag}>
+            Add preorder to bag
           </Button>
         </div>
       )}

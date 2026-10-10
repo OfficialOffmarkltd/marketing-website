@@ -1,22 +1,20 @@
-import { RoutePlaceholder } from "@/components/layout/route-placeholder";
+import type { Metadata } from "next";
 import { getServerDataSource } from "@/data/source.server";
+import { PlatformPage } from "@/features/services/service-pages";
+
+export const metadata: Metadata = {
+  title: "Platform",
+  description:
+    "Explore Offmark's Marketplace commerce service and Drip fashion community.",
+};
 
 export default async function Page() {
   const services = await getServerDataSource().listServices();
-  const platformServices = services.filter((service) =>
-    ["marketplace", "drip"].includes(service.slug),
-  );
   return (
-    <RoutePlaceholder
-      title="Marketplace and Drip"
-      lead="Commerce and community are distinct parts of the Offmark story."
-      detail={
-        platformServices.every(
-          (service) => service.availability === "unconfirmed",
-        )
-          ? "Their availability and final packaging have not been confirmed."
-          : "Displayed statuses are labelled preview data only."
-      }
+    <PlatformPage
+      services={services.filter((service) =>
+        ["marketplace", "drip"].includes(service.slug),
+      )}
     />
   );
 }
