@@ -20,7 +20,17 @@ export function SiteShell({
     }
   }, [path]);
   const compact =
-    path === "/checkout" || path === "/orders" || path.startsWith("/orders/");
+    path === "/checkout" ||
+    path === "/preview/checkout" ||
+    path === "/orders" ||
+    path.startsWith("/orders/") ||
+    path.startsWith("/preview/orders/");
+  const admin =
+    path === "/admin" ||
+    path.startsWith("/admin/") ||
+    path === "/preview/admin" ||
+    path.startsWith("/preview/admin/");
+  if (admin) return <>{children}</>;
   return (
     <>
       <a className="skip-link" href="#main">

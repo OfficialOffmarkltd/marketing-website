@@ -9,7 +9,7 @@ export type Asset = {
   alt: string;
   width: number;
   height: number;
-  provenance: RecordProvenance;
+  provenance?: RecordProvenance;
 };
 
 export type Money = {
@@ -93,6 +93,7 @@ export type BuildUpdate = {
   body: string;
   kind: BuildUpdateKind;
   evidenceUrl?: string;
+  nextWork?: { slug: string; title: string };
   publicationStatus: "draft" | "published";
   provenance: RecordProvenance;
 };

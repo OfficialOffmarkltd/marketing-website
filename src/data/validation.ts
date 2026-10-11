@@ -45,6 +45,12 @@ function optionalString(value: unknown, path: string) {
   return value === undefined ? undefined : string(value, path);
 }
 
+function optionalNullableString(value: unknown, path: string) {
+  return value === undefined || value === null
+    ? undefined
+    : string(value, path);
+}
+
 function boolean(value: unknown, path: string) {
   if (typeof value !== "boolean") return fail(path, "a boolean");
   return value;
@@ -55,6 +61,21 @@ function integer(value: unknown, path: string, minimum = 0) {
     return fail(path, `a safe integer greater than or equal to ${minimum}`);
   }
   return value as number;
+}
+
+function minorUnitInteger(value: unknown, path: string) {
+  if (typeof value === "number") return integer(value, path);
+  if (typeof value !== "string" || !/^\d+$/.test(value)) {
+    return fail(path, "a non-negative integer or decimal integer string");
+  }
+  const parsed = Number(value);
+  if (!Number.isSafeInteger(parsed)) {
+    return fail(
+      path,
+      "a decimal integer string within JavaScript's safe range",
+    );
+  }
+  return parsed;
 }
 
 function finiteNumber(value: unknown, path: string, minimum = 0) {
@@ -113,7 +134,7 @@ function provenance(value: unknown, path: string): RecordProvenance {
 export function parseMoney(value: unknown, path = "money"): Money {
   const item = record(value, path);
   return {
-    amountMinor: integer(item.amountMinor, `${path}.amountMinor`),
+    amountMinor: minorUnitInteger(item.amountMinor, `${path}.amountMinor`),
     currency: enumeration(item.currency, `${path}.currency`, ["NGN"]),
   };
 }
@@ -126,7 +147,10 @@ export function parseAsset(value: unknown, path = "asset"): Asset {
       typeof item.alt === "string" ? item.alt : fail(`${path}.alt`, "a string"),
     width: integer(item.width, `${path}.width`, 1),
     height: integer(item.height, `${path}.height`, 1),
-    provenance: provenance(item.provenance, `${path}.provenance`),
+    provenance:
+      item.provenance === undefined
+        ? undefined
+        : provenance(item.provenance, `${path}.provenance`),
   };
 }
 
@@ -171,7 +195,7 @@ export function parseDrop(value: unknown, path = "drop"): Drop {
     ]),
     designIds: array(item.designIds, `${path}.designIds`, string),
     closesAt:
-      item.closesAt === undefined
+      item.closesAt === undefined || item.closesAt === null
         ? undefined
         : isoDate(item.closesAt, `${path}.closesAt`),
     campaignImage:
@@ -189,7 +213,7 @@ export function parseVariant(value: unknown, path = "variant"): Variant {
     size: string(item.size, `${path}.size`),
     colour: string(item.colour, `${path}.colour`),
     available: boolean(item.available, `${path}.available`),
-    unavailableReason: optionalString(
+    unavailableReason: optionalNullableString(
       item.unavailableReason,
       `${path}.unavailableReason`,
     ),
@@ -262,6 +286,16 @@ export function parseBuildUpdate(
   path = "buildUpdate",
 ): BuildUpdate {
   const item = record(value, path);
+  const nextWork =
+    item.nextWork === undefined
+      ? undefined
+      : (() => {
+          const nw = record(item.nextWork, `${path}.nextWork`);
+          return {
+            slug: slug(nw.slug, `${path}.nextWork.slug`),
+            title: string(nw.title, `${path}.nextWork.title`),
+          };
+        })();
   return {
     id: string(item.id, `${path}.id`),
     slug: slug(item.slug, `${path}.slug`),
@@ -276,6 +310,7 @@ export function parseBuildUpdate(
       "work_in_progress",
     ]),
     evidenceUrl: optionalString(item.evidenceUrl, `${path}.evidenceUrl`),
+    nextWork,
     publicationStatus: enumeration(
       item.publicationStatus,
       `${path}.publicationStatus`,
@@ -312,26 +347,94 @@ export function parseBagLine(value: unknown, path = "bagLine"): BagLine {
   };
 }
 
+function parseStoredBagLine(value: unknown, path: string) {
+  const item = record(value, path);
+  const line = parseBagLine(value, path);
+  return item.unitAmountMinor === undefined
+    ? line
+    : {
+        ...line,
+        unitAmountMinor: integer(
+          item.unitAmountMinor,
+          `${path}.unitAmountMinor`,
+        ),
+      };
+}
+
 export function parseBagStorage(value: unknown): BagStorage {
   const item = record(value, "bag");
   if (item.version !== 1) return fail("bag.version", "the supported version 1");
-  return { version: 1, lines: array(item.lines, "bag.lines", parseBagLine) };
+  return {
+    version: 1,
+    lines: array(item.lines, "bag.lines", parseStoredBagLine),
+  };
+}
+
+function parseValidatedDesign(value: unknown, path: string) {
+  const item = record(value, path);
+  return {
+    id: string(item.id, `${path}.id`),
+    dropId: string(item.dropId, `${path}.dropId`),
+    slug: slug(item.slug, `${path}.slug`),
+    name: string(item.name, `${path}.name`),
+    description: string(item.description, `${path}.description`),
+    price:
+      item.price === undefined
+        ? undefined
+        : parseMoney(item.price, `${path}.price`),
+    materials: string(item.materials, `${path}.materials`),
+    fit: string(item.fit, `${path}.fit`),
+    care: string(item.care, `${path}.care`),
+    estimatedDispatchText: string(
+      item.estimatedDispatchText,
+      `${path}.estimatedDispatchText`,
+    ),
+  };
+}
+
+function parseValidatedDrop(value: unknown, path: string) {
+  const item = record(value, path);
+  return {
+    id: string(item.id, `${path}.id`),
+    slug: slug(item.slug, `${path}.slug`),
+    name: string(item.name, `${path}.name`),
+    story: string(item.story, `${path}.story`),
+    status: enumeration(item.status, `${path}.status`, [
+      "draft",
+      "open",
+      "closing",
+      "retired",
+    ]),
+    closesAt:
+      item.closesAt === undefined || item.closesAt === null
+        ? undefined
+        : isoDate(item.closesAt, `${path}.closesAt`),
+  };
 }
 
 function parseValidatedBagLine(value: unknown, path: string): ValidatedBagLine {
   const item = record(value, path);
   return {
-    design: parseDesign(item.design, `${path}.design`),
-    drop: parseDrop(item.drop, `${path}.drop`),
-    variant: parseVariant(item.variant, `${path}.variant`),
+    design:
+      item.design === null
+        ? null
+        : parseValidatedDesign(item.design, `${path}.design`),
+    drop:
+      item.drop === null ? null : parseValidatedDrop(item.drop, `${path}.drop`),
+    variant:
+      item.variant === null
+        ? null
+        : parseVariant(item.variant, `${path}.variant`),
     quantity: integer(item.quantity, `${path}.quantity`, 1),
     lineTotal: parseMoney(item.lineTotal, `${path}.lineTotal`),
     changes: array(item.changes, `${path}.changes`, (change, changePath) =>
       enumeration(change, changePath, [
         "price_changed",
+        "unpriced",
         "unavailable",
         "quantity_adjusted",
         "removed",
+        "variant_design_mismatch",
       ]),
     ),
   };
@@ -385,7 +488,7 @@ export function parseCheckoutResult(value: unknown): CheckoutResult {
     paymentState: enumeration(
       item.paymentState,
       "checkoutResult.paymentState",
-      ["pending", "failed", "confirmed"],
+      ["pending", "paid", "failed", "refunded"],
     ),
     redirectUrl: optionalString(item.redirectUrl, "checkoutResult.redirectUrl"),
     simulated: boolean(item.simulated, "checkoutResult.simulated"),
@@ -428,7 +531,7 @@ export function parseOrderView(value: unknown): OrderView {
       return {
         occurredAt: isoDate(entry.occurredAt, `${path}.occurredAt`),
         label: string(entry.label, `${path}.label`),
-        detail: optionalString(entry.detail, `${path}.detail`),
+        detail: optionalNullableString(entry.detail, `${path}.detail`),
       };
     }),
     simulated: boolean(item.simulated, "order.simulated"),
@@ -451,12 +554,15 @@ export function parseSafeError(value: unknown): SafeDataError {
   return {
     code: enumeration(item.code, "error.code", [
       "invalid_data",
+      "bad_request",
       "configuration_error",
       "not_found",
       "unavailable",
       "price_changed",
       "quote_expired",
       "unauthorized",
+      "forbidden",
+      "conflict",
       "rate_limited",
       "temporary_failure",
     ]),

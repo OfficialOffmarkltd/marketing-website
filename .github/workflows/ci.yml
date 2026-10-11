@@ -44,5 +44,8 @@ jobs:
       - name: Check data contracts
         run: bun run check:data
 
+      - name: Check bag behavior
+        run: bun run check:bag
+
       - name: Build
         run: bun run build

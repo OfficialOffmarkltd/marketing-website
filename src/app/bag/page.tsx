@@ -1,10 +1,13 @@
-import { RoutePlaceholder } from "@/components/layout/route-placeholder";
+import type { Metadata } from "next";
+import { getServerDataSource } from "@/data/source.server";
+import { BagPage } from "@/features/bag/bag-page";
+import { loadBagCatalogue } from "@/features/bag/data";
 
-export default function Page() {
-  return (
-    <RoutePlaceholder
-      title="Your bag"
-      lead="Bag selection and persistence are not available in this preview yet."
-    />
-  );
+export const metadata: Metadata = {
+  title: "Your bag",
+  robots: { index: false, follow: false },
+};
+
+export default async function Page() {
+  return <BagPage catalogue={await loadBagCatalogue(getServerDataSource())} />;
 }

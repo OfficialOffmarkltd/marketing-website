@@ -1,0 +1,147 @@
+{
+  "services": [
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "slug": "seam",
+      "name": "Seam",
+      "summary": "A fashion design platform.",
+      "availability": "beta",
+      "screenshot": {
+        "src": "https://cdn.example.test/seam.jpg",
+        "alt": "Seam editor",
+        "width": 1200,
+        "height": 800
+      },
+      "provenance": { "kind": "approved", "publishable": true }
+    }
+  ],
+  "drops": [
+    {
+      "id": "22222222-2222-4222-8222-222222222222",
+      "slug": "first-drop",
+      "name": "First Drop",
+      "story": "A published collection.",
+      "status": "open",
+      "designIds": ["33333333-3333-4333-8333-333333333333"],
+      "closesAt": null,
+      "campaignImage": {
+        "src": "https://cdn.example.test/drop.jpg",
+        "alt": "First Drop campaign",
+        "width": 1500,
+        "height": 1000
+      },
+      "provenance": { "kind": "approved", "publishable": true }
+    }
+  ],
+  "design": {
+    "id": "33333333-3333-4333-8333-333333333333",
+    "dropId": "22222222-2222-4222-8222-222222222222",
+    "slug": "wrap-shirt",
+    "name": "Wrap Shirt",
+    "description": "A wrap-front shirt.",
+    "price": { "amountMinor": "4850000", "currency": "NGN" },
+    "images": [
+      {
+        "src": "https://cdn.example.test/wrap-shirt.jpg",
+        "alt": "Wrap Shirt",
+        "width": 1200,
+        "height": 1500
+      }
+    ],
+    "materials": "Cotton",
+    "fit": "Relaxed",
+    "care": "Cold wash",
+    "variants": [
+      {
+        "id": "44444444-4444-4444-8444-444444444444",
+        "size": "M",
+        "colour": "Orange",
+        "available": true,
+        "unavailableReason": null
+      }
+    ],
+    "sizeGuide": {
+      "unit": "cm",
+      "rows": [{ "size": "M", "measurements": { "Chest": 102 } }]
+    },
+    "estimatedDispatchText": "Dispatch in four weeks.",
+    "provenance": { "kind": "approved", "publishable": true }
+  },
+  "validatedBag": {
+    "lines": [
+      {
+        "design": {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "dropId": "22222222-2222-4222-8222-222222222222",
+          "slug": "wrap-shirt",
+          "name": "Wrap Shirt",
+          "description": "A wrap-front shirt.",
+          "priceMinor": "4850000",
+          "materials": "Cotton",
+          "fit": "Relaxed",
+          "care": "Cold wash",
+          "estimatedDispatchText": "Dispatch in four weeks."
+        },
+        "drop": {
+          "id": "22222222-2222-4222-8222-222222222222",
+          "slug": "first-drop",
+          "name": "First Drop",
+          "story": "A published collection.",
+          "status": "open",
+          "closesAt": null
+        },
+        "variant": {
+          "id": "44444444-4444-4444-8444-444444444444",
+          "designId": "33333333-3333-4333-8333-333333333333",
+          "size": "M",
+          "colour": "Orange",
+          "available": true,
+          "unavailableReason": null
+        },
+        "quantity": 1,
+        "lineTotal": { "amountMinor": "4850000", "currency": "NGN" },
+        "changes": []
+      },
+      {
+        "design": null,
+        "drop": null,
+        "variant": null,
+        "quantity": 1,
+        "lineTotal": { "amountMinor": "0", "currency": "NGN" },
+        "changes": ["removed", "unavailable", "unpriced"]
+      }
+    ],
+    "subtotal": { "amountMinor": "4850000", "currency": "NGN" },
+    "validForCheckout": false
+  },
+  "checkoutResult": {
+    "orderReference": "OM-2026-000001",
+    "paymentState": "paid",
+    "redirectUrl": "https://checkout.paystack.example/authorization",
+    "simulated": false
+  },
+  "order": {
+    "reference": "OM-2026-000001",
+    "placedAt": "2026-10-09T12:00:00.000Z",
+    "paymentState": "paid",
+    "fulfillmentState": "awaiting_production",
+    "lines": [],
+    "subtotal": { "amountMinor": "4850000", "currency": "NGN" },
+    "delivery": { "amountMinor": "250000", "currency": "NGN" },
+    "total": { "amountMinor": "5100000", "currency": "NGN" },
+    "estimatedDispatchText": "Dispatch in four weeks.",
+    "events": [
+      {
+        "occurredAt": "2026-10-09T12:00:00.000Z",
+        "label": "Order placed",
+        "detail": null
+      }
+    ],
+    "simulated": false
+  },
+  "conflictError": {
+    "code": "conflict",
+    "message": "The resource changed; retry.",
+    "requestId": "request-123"
+  }
+}

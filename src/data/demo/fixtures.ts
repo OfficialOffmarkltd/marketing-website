@@ -179,6 +179,10 @@ export const demoBuildUpdates = [
     body: "This is not a real company update.",
     kind: "demo",
     publicationStatus: "published",
+    nextWork: {
+      slug: "sample-seam-workflow-update",
+      title: "Sample workflow milestone",
+    },
     provenance: demoProvenance,
   },
   {
@@ -191,6 +195,10 @@ export const demoBuildUpdates = [
     body: "This is not a real product update.",
     kind: "work_in_progress",
     publicationStatus: "published",
+    nextWork: {
+      slug: "sample-community-update",
+      title: "Sample community milestone",
+    },
     provenance: demoProvenance,
   },
   {

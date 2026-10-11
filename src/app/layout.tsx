@@ -4,6 +4,7 @@ import { Footer } from "@/components/layout/footer";
 import { SiteShell } from "@/components/layout/site-shell";
 import { DirectionProvider } from "@/components/ui/direction";
 import { metadataConfig } from "@/config/site.config";
+import { BagProvider } from "@/features/bag/bag-context";
 import "./globals.css";
 
 const inter = Inter({
@@ -31,7 +32,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     >
       <body>
         <DirectionProvider direction="ltr">
-          <SiteShell footer={<Footer />}>{children}</SiteShell>
+          <BagProvider>
+            <SiteShell footer={<Footer />}>{children}</SiteShell>
+          </BagProvider>
         </DirectionProvider>
       </body>
     </html>
