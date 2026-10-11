@@ -14,8 +14,10 @@ export default async function Page({
   return (
     <OrderPage
       reference={(await params).reference}
-      demo
-      scenario={isDemoScenario(requested) ? requested : "success"}
+      configuration={{
+        mode: "demo",
+        scenario: isDemoScenario(requested) ? requested : "success",
+      }}
     />
   );
 }

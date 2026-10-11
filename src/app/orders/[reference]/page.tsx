@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getClientDataConfiguration } from "@/data/source.server";
 import { OrderPage } from "@/features/orders/order-pages";
 
 export const metadata: Metadata = {
@@ -10,5 +11,10 @@ export default async function Page({
 }: {
   params: Promise<{ reference: string }>;
 }) {
-  return <OrderPage reference={(await params).reference} />;
+  return (
+    <OrderPage
+      reference={(await params).reference}
+      configuration={getClientDataConfiguration()}
+    />
+  );
 }

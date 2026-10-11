@@ -12,7 +12,10 @@ export default async function Page({
   return (
     <PlatformPage
       services={await new DemoDataSource("success").listServices()}
-      scenario={submissionScenario((await searchParams).scenario)}
+      clientConfiguration={{
+        mode: "demo",
+        scenario: submissionScenario((await searchParams).scenario),
+      }}
     />
   );
 }

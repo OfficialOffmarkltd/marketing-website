@@ -10,19 +10,19 @@ import { Button } from "@/components/ui/button";
 import { Alert, EmptyState, LoadingState } from "@/components/ui/feedback";
 import { Field } from "@/components/ui/field";
 import { ActionLink } from "@/components/ui/link";
-import type { DemoScenario } from "@/data/demo/scenarios";
-import { DemoDataSource } from "@/data/demo/source";
+import type { ClientDataConfiguration } from "@/data/client-config";
+import { createClientDataSource } from "@/data/client-source";
 import type { OrderView } from "@/domain/commerce";
 import { DataSourceError } from "@/domain/errors";
 import { formatMoney, formatPublishedDate } from "@/domain/format";
 
 export function OrderAccessPage({
-  demo = false,
-  scenario = "success",
+  configuration,
 }: {
-  demo?: boolean;
-  scenario?: DemoScenario;
+  configuration: ClientDataConfiguration;
 }) {
+  const demo = configuration.mode === "demo";
+  const available = configuration.mode !== "public";
   const [email, setEmail] = useState("");
   const [reference, setReference] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -30,22 +30,26 @@ export function OrderAccessPage({
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!demo) return;
+    if (!available) return;
     setSubmitting(true);
     setMessage("");
     try {
-      await new DemoDataSource(scenario).requestOrderAccess({
+      await createClientDataSource(configuration).requestOrderAccess({
         email,
         reference,
       });
       setMessage(
-        "If the fictional order and email matched, an access link would be sent. No email was created.",
+        demo
+          ? "If the fictional order and email matched, an access link would be sent. No email was created."
+          : "If the order reference and email match, an access link will be sent.",
       );
     } catch (error) {
       setMessage(
         error instanceof DataSourceError
           ? error.message
-          : "The simulated access request failed.",
+          : demo
+            ? "The simulated access request failed."
+            : "The access request failed.",
       );
     } finally {
       setSubmitting(false);
@@ -62,7 +66,7 @@ export function OrderAccessPage({
           >
             Track your order.
           </PageHeading>
-          {!demo && (
+          {!available && (
             <Alert title="Order access unavailable">
               The live order service has not been connected.
             </Alert>
@@ -75,7 +79,7 @@ export function OrderAccessPage({
             onChange={(event) => setReference(event.target.value)}
             autoComplete="off"
             required
-            disabled={!demo || submitting}
+            disabled={!available || submitting}
           />
           <Field
             label="Email address"
@@ -84,14 +88,14 @@ export function OrderAccessPage({
             onChange={(event) => setEmail(event.target.value)}
             autoComplete="email"
             required
-            disabled={!demo || submitting}
+            disabled={!available || submitting}
             helper={
-              demo
+              configuration.mode === "demo"
                 ? "Use fictional details in this development preview."
                 : undefined
             }
           />
-          <Button type="submit" loading={submitting} disabled={!demo}>
+          <Button type="submit" loading={submitting} disabled={!available}>
             Email access link
           </Button>
           {message && <Alert title="Request received">{message}</Alert>}
@@ -103,13 +107,13 @@ export function OrderAccessPage({
 
 export function OrderAccessVerifyPage({
   token,
-  demo = false,
-  scenario = "success",
+  configuration,
 }: {
   token?: string;
-  demo?: boolean;
-  scenario?: DemoScenario;
+  configuration: ClientDataConfiguration;
 }) {
+  const demo = configuration.mode === "demo";
+  const available = configuration.mode !== "public";
   const [state, setState] = useState<"verifying" | "authorized" | "error">(
     "verifying",
   );
@@ -121,17 +125,19 @@ export function OrderAccessVerifyPage({
       "",
       demo ? "/preview/orders/access/verify" : "/orders/access/verify",
     );
-    if (!demo || !token) {
+    if (!available || !token) {
       setState("error");
       setMessage("This access link is missing, invalid or expired.");
       return;
     }
-    new DemoDataSource(scenario)
+    createClientDataSource(configuration)
       .redeemOrderAccess(token)
       .then(() => {
         setState("authorized");
         setMessage(
-          "Simulated access established. No real session was created.",
+          demo
+            ? "Simulated access established. No real session was created."
+            : "Secure order access has been established.",
         );
       })
       .catch((error: unknown) => {
@@ -142,7 +148,7 @@ export function OrderAccessVerifyPage({
             : "This access link could not be verified.",
         );
       });
-  }, [demo, scenario, token]);
+  }, [available, configuration, demo, token]);
 
   return (
     <Section>
@@ -156,7 +162,9 @@ export function OrderAccessVerifyPage({
           <Alert
             title={
               state === "authorized"
-                ? "Preview authorized"
+                ? demo
+                  ? "Preview authorized"
+                  : "Access authorized"
                 : "Access unavailable"
             }
             tone={state === "error" ? "error" : "success"}
@@ -164,7 +172,10 @@ export function OrderAccessVerifyPage({
             {message}
           </Alert>
         )}
-        <ActionLink href="/orders/access" variant="text">
+        <ActionLink
+          href={demo ? "/preview/orders/access" : "/orders/access"}
+          variant="text"
+        >
           Request another link
         </ActionLink>
       </Container>
@@ -189,26 +200,27 @@ const fulfillmentLabels: Record<OrderView["fulfillmentState"], string> = {
 
 export function OrderPage({
   reference,
-  demo = false,
-  scenario = "success",
+  configuration,
 }: {
   reference: string;
-  demo?: boolean;
-  scenario?: DemoScenario;
+  configuration: ClientDataConfiguration;
 }) {
+  const demo = configuration.mode === "demo";
+  const available = configuration.mode !== "public";
   const [order, setOrder] = useState<OrderView>();
   const [error, setError] = useState("");
   const [pollingComplete, setPollingComplete] = useState(false);
 
   useEffect(() => {
-    if (!demo) return;
+    if (!available) return;
     let cancelled = false;
     let timeout: ReturnType<typeof setTimeout> | undefined;
     let attempt = 0;
     const load = async () => {
       if (document.visibilityState === "hidden") return;
       try {
-        const next = await new DemoDataSource(scenario).getOrder(reference);
+        const next =
+          await createClientDataSource(configuration).getOrder(reference);
         if (cancelled) return;
         setOrder(next);
         if (next.paymentState === "pending" && attempt < 3) {
@@ -223,7 +235,9 @@ export function OrderPage({
           setError(
             reason instanceof DataSourceError
               ? reason.message
-              : "The simulated order could not be loaded.",
+              : demo
+                ? "The simulated order could not be loaded."
+                : "The order could not be loaded.",
           );
         }
       }
@@ -233,9 +247,9 @@ export function OrderPage({
       cancelled = true;
       if (timeout) clearTimeout(timeout);
     };
-  }, [demo, reference, scenario]);
+  }, [available, configuration, demo, reference]);
 
-  if (!demo) {
+  if (!available) {
     return (
       <Section>
         <Container>
@@ -277,12 +291,14 @@ export function OrderPage({
 
   return (
     <>
-      <div className="demo-banner">
-        <Container>
-          Development preview: this order, payment and fulfillment history are
-          fictional.
-        </Container>
-      </div>
+      {demo && (
+        <div className="demo-banner">
+          <Container>
+            Development preview: this order, payment and fulfillment history are
+            fictional.
+          </Container>
+        </div>
+      )}
       <Section>
         <Container>
           <PageHeading

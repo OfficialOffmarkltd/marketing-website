@@ -15,8 +15,7 @@ export default async function Page({
   return (
     <CheckoutPage
       catalogue={await loadBagCatalogue(new DemoDataSource("success"))}
-      demo
-      scenario={scenario}
+      configuration={{ mode: "demo", scenario }}
     />
   );
 }

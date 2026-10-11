@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getClientDataConfiguration } from "@/data/source.server";
 import { ContactPage } from "@/features/company/company-pages";
 
 export const metadata: Metadata = {
@@ -8,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <ContactPage />;
+  return <ContactPage configuration={getClientDataConfiguration()} />;
 }

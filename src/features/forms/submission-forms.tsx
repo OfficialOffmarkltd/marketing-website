@@ -4,25 +4,23 @@ import { type FormEvent, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Alert } from "@/components/ui/feedback";
 import { Field } from "@/components/ui/field";
-import { DemoDataSource } from "@/data/demo/source";
-import type { SubmissionScenario } from "@/data/demo/submission-scenarios";
+import type { ClientDataConfiguration } from "@/data/client-config";
+import { createClientDataSource } from "@/data/client-source";
 import { DataSourceError } from "@/domain/errors";
 
-type FormMode = "demo" | "unavailable";
-
-function errorMessage(error: unknown) {
+function errorMessage(error: unknown, demo: boolean) {
   if (error instanceof DataSourceError) return error.message;
-  return "The simulated submission failed. Try again.";
+  return demo
+    ? "The simulated submission failed. Try again."
+    : "The submission failed. Try again.";
 }
 
 export function WaitlistForm({
   serviceId,
-  mode,
-  scenario = "success",
+  configuration,
 }: {
   serviceId: string;
-  mode: FormMode;
-  scenario?: SubmissionScenario;
+  configuration: ClientDataConfiguration;
 }) {
   const [email, setEmail] = useState("");
   const [consent, setConsent] = useState(false);
@@ -30,7 +28,8 @@ export function WaitlistForm({
     "idle" | "submitting" | "success" | "error"
   >("idle");
   const [message, setMessage] = useState("");
-  const unavailable = mode === "unavailable";
+  const unavailable = configuration.mode === "public";
+  const demo = configuration.mode === "demo";
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -38,18 +37,20 @@ export function WaitlistForm({
     setState("submitting");
     setMessage("");
     try {
-      await new DemoDataSource(scenario).joinWaitlist({
+      await createClientDataSource(configuration).joinWaitlist({
         email,
         serviceId,
         consent: true,
       });
       setState("success");
       setMessage(
-        "Simulated signup complete. No subscription or email was created.",
+        demo
+          ? "Simulated signup complete. No subscription or email was created."
+          : "You have joined the waitlist.",
       );
     } catch (error) {
       setState("error");
-      setMessage(errorMessage(error));
+      setMessage(errorMessage(error, demo));
     }
   };
 
@@ -66,7 +67,9 @@ export function WaitlistForm({
         helper={
           unavailable
             ? "A waitlist destination has not been confirmed."
-            : "Development preview: use a fictional email address."
+            : demo
+              ? "Development preview: use a fictional email address."
+              : "We will use this address only for service availability updates."
         }
       />
       <label className="submission-consent">
@@ -88,7 +91,13 @@ export function WaitlistForm({
       </Button>
       {message && (
         <Alert
-          title={state === "success" ? "Preview complete" : "Unable to submit"}
+          title={
+            state === "success"
+              ? demo
+                ? "Preview complete"
+                : "Waitlist joined"
+              : "Unable to submit"
+          }
           tone={state === "success" ? "success" : "error"}
         >
           {message}
@@ -99,11 +108,9 @@ export function WaitlistForm({
 }
 
 export function ContactForm({
-  mode,
-  scenario = "success",
+  configuration,
 }: {
-  mode: FormMode;
-  scenario?: SubmissionScenario;
+  configuration: ClientDataConfiguration;
 }) {
   const [values, setValues] = useState({
     name: "",
@@ -115,7 +122,8 @@ export function ContactForm({
     "idle" | "submitting" | "success" | "error"
   >("idle");
   const [message, setMessage] = useState("");
-  const unavailable = mode === "unavailable";
+  const unavailable = configuration.mode === "public";
+  const demo = configuration.mode === "demo";
   const update = (field: keyof typeof values, value: string) =>
     setValues((current) => ({ ...current, [field]: value }));
 
@@ -125,12 +133,16 @@ export function ContactForm({
     setState("submitting");
     setMessage("");
     try {
-      await new DemoDataSource(scenario).sendContact(values);
+      await createClientDataSource(configuration).sendContact(values);
       setState("success");
-      setMessage("Simulated enquiry complete. No message or email was sent.");
+      setMessage(
+        demo
+          ? "Simulated enquiry complete. No message or email was sent."
+          : "Your enquiry has been received.",
+      );
     } catch (error) {
       setState("error");
-      setMessage(errorMessage(error));
+      setMessage(errorMessage(error, demo));
     }
   };
 
@@ -177,7 +189,9 @@ export function ContactForm({
         <p className="field-helper">
           {unavailable
             ? "A verified contact destination has not been connected."
-            : "Development preview: this message remains in your browser."}
+            : demo
+              ? "Development preview: this message remains in your browser."
+              : "Your enquiry will be sent to the Offmark team."}
         </p>
       </div>
       <Button
@@ -189,7 +203,13 @@ export function ContactForm({
       </Button>
       {message && (
         <Alert
-          title={state === "success" ? "Preview complete" : "Unable to submit"}
+          title={
+            state === "success"
+              ? demo
+                ? "Preview complete"
+                : "Enquiry received"
+              : "Unable to submit"
+          }
           tone={state === "success" ? "success" : "error"}
         >
           {message}

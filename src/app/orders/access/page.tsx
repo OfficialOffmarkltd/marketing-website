@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getClientDataConfiguration } from "@/data/source.server";
 import { OrderAccessPage } from "@/features/orders/order-pages";
 
 export const metadata: Metadata = {
@@ -6,5 +7,5 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 export default function Page() {
-  return <OrderAccessPage />;
+  return <OrderAccessPage configuration={getClientDataConfiguration()} />;
 }

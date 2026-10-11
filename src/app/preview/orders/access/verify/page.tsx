@@ -11,10 +11,11 @@ export default async function Page({
   return (
     <OrderAccessVerifyPage
       token={values.token}
-      demo
-      scenario={
-        values.scenario === "access_expired" ? "access_expired" : "success"
-      }
+      configuration={{
+        mode: "demo",
+        scenario:
+          values.scenario === "access_expired" ? "access_expired" : "success",
+      }}
     />
   );
 }

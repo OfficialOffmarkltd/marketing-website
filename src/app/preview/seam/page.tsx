@@ -15,7 +15,10 @@ export default async function Page({
   return (
     <SeamPage
       service={service}
-      scenario={submissionScenario((await searchParams).scenario)}
+      clientConfiguration={{
+        mode: "demo",
+        scenario: submissionScenario((await searchParams).scenario),
+      }}
     />
   );
 }

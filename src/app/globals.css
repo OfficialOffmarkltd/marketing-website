@@ -468,6 +468,11 @@
     flex-wrap: wrap;
     gap: var(--space-3);
   }
+  .admin-order-filters {
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
   .admin-sidebar .button-secondary {
     color: var(--canvas);
   }
@@ -505,6 +510,23 @@
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-2);
+  }
+  .admin-record-detail {
+    min-width: 0;
+    padding: var(--space-4);
+    border: 1px solid var(--divider);
+    background: var(--surface);
+  }
+  .admin-record-detail summary {
+    cursor: pointer;
+  }
+  .admin-record-detail pre {
+    max-width: 100%;
+    margin-top: var(--space-4);
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-size: 12px;
   }
 }
 

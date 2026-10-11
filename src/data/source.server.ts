@@ -1,3 +1,4 @@
+import type { ClientDataConfiguration } from "./client-config";
 import type { OffmarkDataSource } from "./contracts";
 import { DemoDataSource } from "./demo/source";
 import { HttpDataSource } from "./http/source";
@@ -16,4 +17,15 @@ export function getServerDataSource(): OffmarkDataSource {
     case "live":
       return new HttpDataSource(configuration.apiOrigin);
   }
+}
+
+export function getClientDataConfiguration(): ClientDataConfiguration {
+  const configuration = readDataConfiguration();
+  if (configuration.mode !== "live") return configuration;
+  return {
+    mode: "live",
+    apiOrigin:
+      process.env.NEXT_PUBLIC_OFFMARK_API_ORIGIN?.trim() ||
+      configuration.apiOrigin,
+  };
 }

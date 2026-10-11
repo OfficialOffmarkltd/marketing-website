@@ -8,9 +8,10 @@ export default async function Page({
 }) {
   if (process.env.NODE_ENV !== "development") notFound();
   const section = (await params).section?.join("/") ?? "";
+  const configuration = { mode: "demo", scenario: "success" } as const;
   return section === "login" ? (
-    <AdminLoginPage demo />
+    <AdminLoginPage configuration={configuration} />
   ) : (
-    <AdminPage section={section} demo />
+    <AdminPage section={section} configuration={configuration} />
   );
 }

@@ -8,6 +8,7 @@ export const demoScenarioNames = [
   "expired_quote",
   "payment_pending",
   "payment_failed",
+  "payment_cancelled",
   "payment_confirmed",
   "order_dispatched",
   "order_refunded",

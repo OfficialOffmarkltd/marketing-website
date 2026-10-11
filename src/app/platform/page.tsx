@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { getServerDataSource } from "@/data/source.server";
+import {
+  getClientDataConfiguration,
+  getServerDataSource,
+} from "@/data/source.server";
 import { PlatformPage } from "@/features/services/service-pages";
 
 export const metadata: Metadata = {
@@ -15,6 +18,7 @@ export default async function Page() {
       services={services.filter((service) =>
         ["marketplace", "drip"].includes(service.slug),
       )}
+      clientConfiguration={getClientDataConfiguration()}
     />
   );
 }

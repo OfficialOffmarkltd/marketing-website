@@ -10,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Alert, EmptyState, LoadingState } from "@/components/ui/feedback";
 import { Field } from "@/components/ui/field";
 import { ActionLink } from "@/components/ui/link";
-import type { DemoScenario } from "@/data/demo/scenarios";
-import { DemoDataSource } from "@/data/demo/source";
+import type { ClientDataConfiguration } from "@/data/client-config";
+import { createClientDataSource } from "@/data/client-source";
 import type { CheckoutQuote, CheckoutResult } from "@/domain/commerce";
 import { DataSourceError } from "@/domain/errors";
 import { formatMoney } from "@/domain/format";
@@ -41,13 +41,13 @@ const initialValues: CheckoutValues = {
 
 export function CheckoutPage({
   catalogue,
-  demo = false,
-  scenario = "success",
+  configuration,
 }: {
   catalogue: BagCatalogueItem[];
-  demo?: boolean;
-  scenario?: DemoScenario;
+  configuration: ClientDataConfiguration;
 }) {
+  const demo = configuration.mode === "demo";
+  const available = configuration.mode !== "public";
   const { lines, hydrated } = useBag();
   const [values, setValues] = useState(initialValues);
   const [quote, setQuote] = useState<CheckoutQuote>();
@@ -67,11 +67,11 @@ export function CheckoutPage({
 
   useEffect(() => setIdempotencyKey(crypto.randomUUID()), []);
   useEffect(() => {
-    if (!hydrated || !validBag || !demo) return;
+    if (!hydrated || !validBag || !available) return;
     let cancelled = false;
     setQuoteState("loading");
     setMessage("");
-    new DemoDataSource(scenario)
+    createClientDataSource(configuration)
       .createQuote(
         lines.map(({ designId, variantId, quantity }) => ({
           designId,
@@ -96,17 +96,19 @@ export function CheckoutPage({
     return () => {
       cancelled = true;
     };
-  }, [demo, hydrated, lines, scenario, validBag]);
+  }, [available, configuration, hydrated, lines, validBag]);
 
   const update = (field: keyof CheckoutValues, value: string) =>
     setValues((current) => ({ ...current, [field]: value }));
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!demo || !quote || !validBag || !idempotencyKey) return;
+    if (!available || !quote || !validBag || !idempotencyKey) return;
     if (new Date(quote.expiresAt).getTime() <= Date.now()) {
       setMessage(
-        "The simulated quote expired. Return to the bag and try again.",
+        demo
+          ? "The simulated quote expired. Return to the bag and try again."
+          : "The quote expired. Return to the bag and try again.",
       );
       setQuoteState("error");
       return;
@@ -115,7 +117,9 @@ export function CheckoutPage({
     setSubmitting(true);
     setMessage("");
     try {
-      const checkoutResult = await new DemoDataSource(scenario).beginCheckout({
+      const checkoutResult = await createClientDataSource(
+        configuration,
+      ).beginCheckout({
         quoteId: quote.id,
         contact: {
           email: values.email,
@@ -133,18 +137,37 @@ export function CheckoutPage({
         idempotencyKey,
       });
       setResult(checkoutResult);
+      if (!demo && checkoutResult.redirectUrl) {
+        const paymentUrl = new URL(checkoutResult.redirectUrl);
+        if (paymentUrl.protocol !== "https:") {
+          throw new Error("The payment provider returned an unsafe URL.");
+        }
+        window.location.assign(paymentUrl.href);
+        return;
+      }
       setMessage(
-        checkoutResult.paymentState === "failed"
-          ? "Simulated payment failed. Your entered details were kept for retry."
-          : checkoutResult.paymentState === "pending"
-            ? "Simulated payment is pending verification. No order or payment was created."
-            : "Simulated payment confirmed. No order or payment was created.",
+        configuration.mode === "demo" &&
+          configuration.scenario === "payment_cancelled"
+          ? "Simulated payment handoff was cancelled. No payment was created, and your details were kept."
+          : checkoutResult.paymentState === "failed"
+            ? demo
+              ? "Simulated payment failed. Your entered details were kept for retry."
+              : "Payment could not be started. Your entered details were kept for retry."
+            : checkoutResult.paymentState === "pending"
+              ? demo
+                ? "Simulated payment is pending verification. No order or payment was created."
+                : "Payment is pending verification. Check the protected order status before retrying."
+              : demo
+                ? "Simulated payment confirmed. No order or payment was created."
+                : "Payment response received. Verify the protected order status before treating payment as final.",
       );
     } catch (error) {
       setMessage(
         error instanceof DataSourceError
           ? error.message
-          : "The simulated checkout could not continue.",
+          : demo
+            ? "The simulated checkout could not continue."
+            : "Checkout could not continue.",
       );
     } finally {
       setSubmitting(false);
@@ -194,7 +217,7 @@ export function CheckoutPage({
           >
             Complete your preorder.
           </PageHeading>
-          {!demo && (
+          {!available && (
             <Alert title="Checkout unavailable">
               The live checkout service has not been connected.
             </Alert>
@@ -225,7 +248,7 @@ export function CheckoutPage({
                   onChange={(event) => update("email", event.target.value)}
                   autoComplete="email"
                   required
-                  disabled={!demo || submitting}
+                  disabled={!available || submitting}
                 />
               </section>
               <section aria-labelledby="checkout-delivery-heading">
@@ -241,7 +264,7 @@ export function CheckoutPage({
                     }
                     autoComplete="name"
                     required
-                    disabled={!demo || submitting}
+                    disabled={!available || submitting}
                   />
                   <Field
                     label="Phone"
@@ -250,7 +273,7 @@ export function CheckoutPage({
                     onChange={(event) => update("phone", event.target.value)}
                     autoComplete="tel"
                     required
-                    disabled={!demo || submitting}
+                    disabled={!available || submitting}
                   />
                 </div>
                 <Field
@@ -259,14 +282,14 @@ export function CheckoutPage({
                   onChange={(event) => update("line1", event.target.value)}
                   autoComplete="address-line1"
                   required
-                  disabled={!demo || submitting}
+                  disabled={!available || submitting}
                 />
                 <Field
                   label="Address line 2"
                   value={values.line2}
                   onChange={(event) => update("line2", event.target.value)}
                   autoComplete="address-line2"
-                  disabled={!demo || submitting}
+                  disabled={!available || submitting}
                 />
                 <div className="checkout-field-grid">
                   <Field
@@ -275,7 +298,7 @@ export function CheckoutPage({
                     onChange={(event) => update("city", event.target.value)}
                     autoComplete="address-level2"
                     required
-                    disabled={!demo || submitting}
+                    disabled={!available || submitting}
                   />
                   <Field
                     label="State"
@@ -283,7 +306,7 @@ export function CheckoutPage({
                     onChange={(event) => update("state", event.target.value)}
                     autoComplete="address-level1"
                     required
-                    disabled={!demo || submitting}
+                    disabled={!available || submitting}
                   />
                 </div>
               </section>
@@ -296,7 +319,8 @@ export function CheckoutPage({
                     disabled={submitting}
                   />
                   <span>
-                    I accept the displayed fictional preorder policy version.
+                    I accept the displayed {demo ? "fictional " : ""}preorder
+                    policy version.
                   </span>
                 </label>
               )}
@@ -304,7 +328,7 @@ export function CheckoutPage({
                 type="submit"
                 loading={submitting}
                 disabled={
-                  !demo ||
+                  !available ||
                   !validBag ||
                   !quote ||
                   (quote.requiresAcknowledgement && !accepted)
@@ -317,7 +341,9 @@ export function CheckoutPage({
                   title={
                     result?.paymentState === "failed"
                       ? "Payment failed"
-                      : "Checkout preview"
+                      : demo
+                        ? "Checkout preview"
+                        : "Checkout status"
                   }
                   tone={result?.paymentState === "failed" ? "error" : "success"}
                 >

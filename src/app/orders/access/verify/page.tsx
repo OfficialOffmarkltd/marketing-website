@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getClientDataConfiguration } from "@/data/source.server";
 import { OrderAccessVerifyPage } from "@/features/orders/order-pages";
 
 export const metadata: Metadata = {
@@ -10,5 +11,10 @@ export default async function Page({
 }: {
   searchParams: Promise<{ token?: string }>;
 }) {
-  return <OrderAccessVerifyPage token={(await searchParams).token} />;
+  return (
+    <OrderAccessVerifyPage
+      token={(await searchParams).token}
+      configuration={getClientDataConfiguration()}
+    />
+  );
 }

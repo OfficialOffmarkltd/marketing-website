@@ -3,7 +3,7 @@ import {
   PageHeading,
   Section,
 } from "@/components/layout/primitives";
-import type { SubmissionScenario } from "@/data/demo/submission-scenarios";
+import type { ClientDataConfiguration } from "@/data/client-config";
 import type { Policy } from "@/domain/catalog";
 import { formatPublishedDate } from "@/domain/format";
 import { ContactForm } from "@/features/forms/submission-forms";
@@ -67,12 +67,11 @@ export function AboutPage() {
 }
 
 export function ContactPage({
-  demo = false,
-  scenario = "success",
+  configuration,
 }: {
-  demo?: boolean;
-  scenario?: SubmissionScenario;
+  configuration: ClientDataConfiguration;
 }) {
+  const demo = configuration.mode === "demo";
   return (
     <>
       {demo && (
@@ -96,10 +95,7 @@ export function ContactPage({
               contact has been approved for publication.
             </p>
           </div>
-          <ContactForm
-            mode={demo ? "demo" : "unavailable"}
-            scenario={scenario}
-          />
+          <ContactForm configuration={configuration} />
         </Container>
       </Section>
     </>

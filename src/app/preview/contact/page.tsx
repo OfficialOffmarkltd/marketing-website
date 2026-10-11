@@ -9,5 +9,5 @@ export default async function Page({
 }) {
   if (process.env.NODE_ENV !== "development") notFound();
   const scenario = submissionScenario((await searchParams).scenario);
-  return <ContactPage demo scenario={scenario} />;
+  return <ContactPage configuration={{ mode: "demo", scenario }} />;
 }

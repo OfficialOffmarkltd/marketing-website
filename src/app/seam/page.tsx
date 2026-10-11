@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { getServerDataSource } from "@/data/source.server";
+import {
+  getClientDataConfiguration,
+  getServerDataSource,
+} from "@/data/source.server";
 import { SeamPage } from "@/features/services/service-pages";
 
 export const metadata: Metadata = {
@@ -11,5 +14,10 @@ export default async function Page() {
   const seam = (await getServerDataSource().listServices()).find(
     (service) => service.slug === "seam",
   );
-  return <SeamPage service={seam} />;
+  return (
+    <SeamPage
+      service={seam}
+      clientConfiguration={getClientDataConfiguration()}
+    />
+  );
 }

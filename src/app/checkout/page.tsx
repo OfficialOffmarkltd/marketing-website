@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { getServerDataSource } from "@/data/source.server";
+import {
+  getClientDataConfiguration,
+  getServerDataSource,
+} from "@/data/source.server";
 import { loadBagCatalogue } from "@/features/bag/data";
 import { CheckoutPage } from "@/features/checkout/checkout-page";
 
@@ -10,6 +13,9 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   return (
-    <CheckoutPage catalogue={await loadBagCatalogue(getServerDataSource())} />
+    <CheckoutPage
+      catalogue={await loadBagCatalogue(getServerDataSource())}
+      configuration={getClientDataConfiguration()}
+    />
   );
 }

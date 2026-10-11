@@ -4,7 +4,7 @@ import {
   Section,
 } from "@/components/layout/primitives";
 import { Badge, EmptyState } from "@/components/ui/feedback";
-import type { SubmissionScenario } from "@/data/demo/submission-scenarios";
+import type { ClientDataConfiguration } from "@/data/client-config";
 import type { Service } from "@/domain/catalog";
 import { CollectionMedia } from "@/features/collections/media";
 import { WaitlistForm } from "@/features/forms/submission-forms";
@@ -42,10 +42,10 @@ function ServiceAction({ service }: { service?: Service }) {
 
 export function SeamPage({
   service,
-  scenario = "success",
+  clientConfiguration,
 }: {
   service?: Service;
-  scenario?: SubmissionScenario;
+  clientConfiguration: ClientDataConfiguration;
 }) {
   const demo = service?.provenance.kind === "demo";
   return (
@@ -178,8 +178,7 @@ export function SeamPage({
                 <h3 className="heading-card">Preview the waitlist state</h3>
                 <WaitlistForm
                   serviceId={service.id}
-                  mode="demo"
-                  scenario={scenario}
+                  configuration={clientConfiguration}
                 />
               </div>
             )}
@@ -230,11 +229,11 @@ export function SeamPage({
 function PlatformService({
   service,
   title,
-  scenario,
+  clientConfiguration,
 }: {
   service?: Service;
   title: "Marketplace" | "Drip";
-  scenario: SubmissionScenario;
+  clientConfiguration: ClientDataConfiguration;
 }) {
   const demo = service?.provenance.kind === "demo";
   const isMarketplace = title === "Marketplace";
@@ -271,8 +270,7 @@ function PlatformService({
               <h3 className="heading-card">Preview the waitlist state</h3>
               <WaitlistForm
                 serviceId={service.id}
-                mode="demo"
-                scenario={scenario}
+                configuration={clientConfiguration}
               />
             </div>
           )}
@@ -284,10 +282,10 @@ function PlatformService({
 
 export function PlatformPage({
   services,
-  scenario = "success",
+  clientConfiguration,
 }: {
   services: Service[];
-  scenario?: SubmissionScenario;
+  clientConfiguration: ClientDataConfiguration;
 }) {
   const marketplace = services.find(
     (service) => service.slug === "marketplace",
@@ -316,9 +314,13 @@ export function PlatformPage({
       <PlatformService
         service={marketplace}
         title="Marketplace"
-        scenario={scenario}
+        clientConfiguration={clientConfiguration}
       />
-      <PlatformService service={drip} title="Drip" scenario={scenario} />
+      <PlatformService
+        service={drip}
+        title="Drip"
+        clientConfiguration={clientConfiguration}
+      />
     </>
   );
 }
