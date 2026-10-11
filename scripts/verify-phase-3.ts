@@ -169,7 +169,7 @@ async function main() {
   const loadingStarted = performance.now();
   await new DemoDataSource("loading").listDrops();
   assert(performance.now() - loadingStarted >= 500);
-  assert.equal(demoScenarioNames.length, 15);
+  assert.equal(demoScenarioNames.length, 16);
 
   assert.deepEqual(parseBagStorage({ version: 1, lines: [sampleLine] }), {
     version: 1,
