@@ -175,7 +175,7 @@ type RouteViewportResult = {
 
   const functionalChecks: Record<string, CheckResult> = {};
 
-  await page.goto(origin + "/contact", { waitUntil: "networkidle" });
+  await page.goto(`${origin}/contact`, { waitUntil: "networkidle" });
   functionalChecks.publicContactUnavailable = {
     pass:
       (await page.getByRole("button", { name: "Send enquiry" }).isDisabled()) &&
@@ -184,7 +184,7 @@ type RouteViewportResult = {
         .isVisible()),
   };
 
-  await page.goto(origin + "/seam", { waitUntil: "networkidle" });
+  await page.goto(`${origin}/seam`, { waitUntil: "networkidle" });
   functionalChecks.publicWaitlistNotInvented = {
     pass:
       (await page.getByText("Availability unconfirmed").isVisible()) &&
@@ -202,7 +202,7 @@ type RouteViewportResult = {
       .fill("This remains local.");
   };
 
-  await page.goto(origin + "/preview/contact", { waitUntil: "networkidle" });
+  await page.goto(`${origin}/preview/contact`, { waitUntil: "networkidle" });
   await fillContact();
   await page.getByRole("button", { name: "Send enquiry" }).click();
   await page
@@ -210,7 +210,7 @@ type RouteViewportResult = {
     .waitFor();
   functionalChecks.contactSuccess = { pass: true };
 
-  await page.goto(origin + "/preview/contact?scenario=temporary_failure", {
+  await page.goto(`${origin}/preview/contact?scenario=temporary_failure`, {
     waitUntil: "networkidle",
   });
   await fillContact();
@@ -224,7 +224,7 @@ type RouteViewportResult = {
       "Preview enquiry",
   };
 
-  await page.goto(origin + "/preview/contact?scenario=loading", {
+  await page.goto(`${origin}/preview/contact?scenario=loading`, {
     waitUntil: "networkidle",
   });
   await fillContact();
@@ -239,7 +239,7 @@ type RouteViewportResult = {
     .getByText("Simulated enquiry complete. No message or email was sent.")
     .waitFor();
 
-  await page.goto(origin + "/preview/seam", { waitUntil: "networkidle" });
+  await page.goto(`${origin}/preview/seam`, { waitUntil: "networkidle" });
   const seamForm = page.locator(".submission-form").first();
   await seamForm
     .getByLabel("Email address", { exact: false })
@@ -253,7 +253,7 @@ type RouteViewportResult = {
     .waitFor();
   functionalChecks.waitlistSuccess = { pass: true };
 
-  await page.goto(origin + "/preview/platform?scenario=rate_limited", {
+  await page.goto(`${origin}/preview/platform?scenario=rate_limited`, {
     waitUntil: "networkidle",
   });
   const platformForm = page.locator(".submission-form").first();
@@ -267,7 +267,7 @@ type RouteViewportResult = {
     .waitFor();
   functionalChecks.waitlistRateLimit = { pass: true };
 
-  await page.goto(origin + `/preview/building/${firstBuildSlug}`, {
+  await page.goto(`${origin}/preview/building/${firstBuildSlug}`, {
     waitUntil: "networkidle",
   });
   functionalChecks.buildingNextWork = {

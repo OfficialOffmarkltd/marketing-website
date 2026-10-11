@@ -92,6 +92,20 @@ async function fillCheckout(page: Page) {
     "preview@example.test",
   );
 
+  await page.goto(`${origin}/preview/checkout?scenario=payment_cancelled`, {
+    waitUntil: "networkidle",
+  });
+  await fillCheckout(page);
+  await page.getByRole("button", { name: "Pay stated total" }).click();
+  await page
+    .getByText(/payment handoff was cancelled/i)
+    .first()
+    .waitFor();
+  assert.equal(
+    await page.getByLabel("Email address", { exact: false }).inputValue(),
+    "preview@example.test",
+  );
+
   await page.goto(`${origin}/preview/checkout?scenario=delivery_unavailable`, {
     waitUntil: "networkidle",
   });
@@ -198,9 +212,9 @@ async function fillCheckout(page: Page) {
     .first()
     .waitFor({ timeout: 10_000 });
 
-  await page.goto(`${origin}/admin`, { waitUntil: "networkidle" });
+  await page.goto(`${origin}/admin/login`, { waitUntil: "networkidle" });
   await page
-    .getByText(/live staff authentication adapter has not been connected/)
+    .getByText(/Set the site data mode and API origin/)
     .first()
     .waitFor();
   await page.goto(`${origin}/preview/admin`, { waitUntil: "networkidle" });
@@ -219,7 +233,7 @@ async function fillCheckout(page: Page) {
     .getByLabel("Staff email", { exact: false })
     .fill("staff@offmark.test");
   await page.getByLabel("Password", { exact: false }).fill("preview-only");
-  await page.getByRole("radio", { name: "Operations" }).check();
+  await page.getByRole("radio", { name: "Staff" }).check();
   await page.getByRole("button", { name: "Sign in" }).click();
   await page.waitForURL("**/preview/admin");
   await page.getByRole("heading", { name: "Operational overview" }).waitFor();
@@ -257,7 +271,7 @@ async function fillCheckout(page: Page) {
       ["order", "/preview/orders/DEMO-ORDER-001?scenario=order_dispatched"],
       ["admin", "/preview/admin/orders"],
     ]) {
-      await page.goto(origin + route, { waitUntil: "networkidle" });
+      await page.goto(`${origin}${route}`, { waitUntil: "networkidle" });
       const scrollWidth = await page.evaluate(
         () => document.documentElement.scrollWidth,
       );
@@ -282,6 +296,7 @@ async function fillCheckout(page: Page) {
         checkout: {
           confirmed: true,
           failedPreservesInput: true,
+          cancelledPreservesInput: true,
           deliveryUnavailable: true,
           expiredQuote: true,
           pending: true,
@@ -297,9 +312,9 @@ async function fillCheckout(page: Page) {
           boundedPolling: true,
         },
         admin: {
-          liveUnavailable: true,
+          publicModeUnavailable: true,
           invalidCredentials: true,
-          operationsForbidden: true,
+          staffForbidden: true,
           refreshAndLogout: true,
           adminUsers: true,
           separateShell: true,

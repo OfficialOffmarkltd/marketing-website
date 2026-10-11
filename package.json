@@ -12,6 +12,7 @@
     "check:bag": "bun scripts/verify-phase-6.ts",
     "check:phase7": "bun scripts/verify-phase-7.ts",
     "check:phases8-10": "bun scripts/verify-phases-8-10.ts",
+    "check:live-contract": "bun scripts/verify-live-contract.ts",
     "format": "biome format --write",
     "prepare": "lefthook install"
   },
